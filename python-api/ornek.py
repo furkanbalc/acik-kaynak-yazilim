@@ -1,44 +1,32 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
 import pandas as pd
+import requests
 
 app = Flask(__name__)
 api = Api(app)
 
-class Users(Resource):
-    def get(self):
-        data = pd.read_csv('kullanici.csv')
-        data = data.to_dict('records')
-        return {'data' : data}, 200
 
-    def post(self):
-        name = request.args['name']
-        name = request.args['age']
-        name = request.args['city']
-        req_data = pd.DataFrame({
-            'name'      : [name],
-            'age'       : [age],
-            'city'      : [city]
-        })
-        data = pd.read_csv('kullanici.csv')
-        data_data.append(req_data,ignore_index=True)
-        data.to_csv('kullanici.csv', index=False)
-        return {'message' : 'Record successfully added.'}, 200
+# API'nin base URL'i
+base_url = "https://passwordinator.onrender.com"
 
-class Name(Resource):
-    def get(self,name):
-        data = pd.read_csv('kullanici.csv')
-        data = data.to_dict('records')
-        for entry in data:
-            if entry['name'] == name :
-                return {'data' : entry}, 200
-        return {'message' : 'No entry found with this name !'}, 404
+# -?len=18 ( 18 karakterlik şifre oluşturur. 7'den büyük olmalıdır. Varsayılan 12'dir)
+class CreatePass(Resource):
+    def get(self,lenght):
+        url = f"{base_url}/?len={length}"
+        response = requests.get(url)
+    
+        if response.status_code == 200:
+            password = response.json().get('data')
+            return password
+        else:
+            return {'error': f'error'}, 500  
 
 # Add URL endpoints
-api.add_resource(Users, '/users')
-api.add_resource(Name, '/<string:name>')
+api.add_resource(CreatePass, '/createpassword/<string:lenght>')
 
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=6767)
     app.run()
+
